@@ -1,0 +1,404 @@
+#include<stdio.h>
+#include<stdlib.h>
+struct node
+{
+    int data;
+    struct node *next;
+}*head;
+
+void create()
+{
+    head=0;     //initialise head to 0
+    struct node *newnode;
+    struct node *temp=head;
+    int choice=1;
+    while(choice)
+    {
+        newnode=(struct node *)malloc(sizeof(struct node));
+        printf("\nEnter Data: ");
+        scanf("%d", &newnode->data);
+        newnode->next=0;
+        if(head==0)
+            head=temp=newnode;
+        else
+        {
+            temp->next=newnode;
+            temp=newnode;
+        }
+        temp->next=head;        //linking back to head
+        label: printf("\nDo you want to enter another node?");
+        scanf("%d", &choice);
+        if(choice==0 || choice==1)
+            continue;
+        else
+            goto label;
+    }
+}
+
+void display()
+{
+    struct node *temp=head;
+    while(temp->next!=head)
+    {
+        printf("%d ", temp->data);
+        temp=temp->next;
+    }
+    printf("%d", temp->data);
+}
+
+int searchByKey(int key)
+{
+    struct node *temp=head;
+    int c=1, t=-1;
+    do
+    {
+        if(temp->data==key)
+        {
+            t=0;
+            printf("%d element found in %d position", key, c);
+            return 0;
+        }
+        c++;
+        temp=temp->next;
+    } while (temp != head);
+
+    if(t<0)
+        {
+            printf("%d element not found.", key);
+            return -1;
+        }
+}
+
+int searchbypos(int pos)
+{
+    struct node *temp=head;
+    int c=1, t=-1;
+    do
+    {
+        if(c==pos)
+        {
+            printf("%d element found in %d position.", temp->data, pos);
+            t=0;
+            return 0;
+        }
+        c++;
+        temp=temp->next;
+    }while(temp!=head);
+    if(t<0)
+    {
+        printf("Position not found.");
+        return -1;
+    }
+}
+
+int deletebykey(int key) {
+    if (head == NULL) {
+        printf("List is empty.\n");
+        return -1;
+    }
+    struct node *temp = head, *prev = NULL;
+    do {
+        if (temp->data == key) {
+            if (prev == NULL) { // If the node to delete is the head
+                if (temp->next == head) // Only one node in the list
+                    head = NULL;
+                else {
+                    head = temp->next;
+                    struct node *last = head;
+                    while (last->next != temp)
+                        last = last->next;
+                    last->next = head;
+                }
+            } else {
+                prev->next = temp->next;
+            }
+            printf("%d element found and deleted.\n", key);
+            free(temp);
+            return 0;
+        }
+        prev = temp;
+        temp = temp->next;
+    } while (temp != head);
+
+    printf("Element not found.\n");
+    return -1;
+}
+
+void insertbyorder(int key) {
+    struct node *temp = head, *prev = NULL;
+    struct node *newnode = (struct node *)malloc(sizeof(struct node)); // Allocate memory for the new node
+    if (newnode == NULL) {
+        printf("Memory allocation failed.\n");
+        return;
+    }
+    newnode->data = key;
+    newnode->next = NULL;
+
+    if (head == NULL) { // If the list is empty, make the new node the head
+        head = newnode;
+        head->next = head; // Point to itself to form a circular list
+        return;
+    }
+
+    do {
+        if (temp->data > key) { // If the current node's data is greater than the key, insert before it
+            if (prev == NULL) { // Inserting at the beginning of the list
+                newnode->next = head;
+                head = newnode;
+                struct node *last = head;
+                while (last->next != head)
+                    last = last->next;
+                last->next = head; // Update last node's next to point to head
+            } else {
+                prev->next = newnode;
+                newnode->next = temp;
+            }
+            return; // Inserted the node, so return
+        }
+        prev = temp;
+        temp = temp->next;
+    } while (temp != head);
+
+    // If the key is greater than all existing keys, insert at the end
+    prev->next = newnode;
+    newnode->next = head; // Make it circular
+}
+
+void insertatbeg(int key)
+{
+    struct node *newnode=(struct node *)malloc(sizeof(struct node));
+    newnode->data=key;
+    newnode->next=NULL;
+    struct node *temp=head;
+    if(head==0)
+        temp=head=newnode;
+    else
+    {
+        while(temp->next!=head)
+            temp=temp->next;
+        temp->next=newnode;
+        newnode->next=head;
+        head=newnode;
+    }
+}
+
+void insertatend(int key)
+{
+    struct node *newnode=(struct node *)malloc(sizeof(struct node));
+    newnode->data=key;
+    newnode->next=NULL;
+    struct node *temp=head;
+    if(head==0)
+        temp=head=newnode;
+    else
+    {
+        while(temp->next!=head)
+        {
+            temp=temp->next;
+        }
+        temp->next=newnode;
+        newnode->next=head;
+    }
+}
+
+void insertatpos(int pos, int key)
+{
+    struct node *newnode=(struct node *)malloc(sizeof(struct node));
+    newnode->data=key;
+    int c=0;
+    struct node *prev=NULL;
+    newnode->next=NULL;
+    struct node *temp=head;
+    do
+    {
+        c++;
+        temp=temp->next;
+    }while(temp!=head);
+    temp=head;
+    if(pos==1)
+    {
+        while(temp->next !=head)
+            temp=temp->next;
+        temp->next=newnode;
+        newnode->next=head;
+        head=newnode;
+    }
+    else if(pos==c+1)
+    {
+        while(temp->next != head)
+            temp=temp->next;
+        temp->next=newnode;
+        newnode->next=head;
+    }
+    else if(pos>1 && pos<c)
+    {
+        for(int i=1; i<pos && temp->next!=head; i++)
+        {
+            prev=temp;
+            temp=temp->next;
+        }
+        prev->next=newnode;
+        newnode->next=temp;
+    }
+    else
+        printf("Invalid position.");
+}
+
+
+void deletefront()
+{
+    struct node *temp=head;
+    struct node *prev=head;
+    if(head->next==head)
+        free(head);
+
+    while(temp->next != head)
+    {
+        temp=temp->next;
+    }
+    temp->next=head->next;
+    head=head->next;
+    free(prev);
+}
+
+void deleteRear()
+{
+    struct node *temp=head, *prev=NULL;
+    if(head->next==head)
+        free(head);
+    while(temp->next != head)
+    {
+        prev=temp;
+        temp=temp->next;
+    }
+    prev->next=head;
+    free(temp);
+}
+
+void deletePos(int pos)
+{
+    struct node *temp=head, *prev=NULL;
+    int c=0;
+    do
+    {
+        c++;
+        temp=temp->next;
+    }while(temp!=head);
+
+    if(pos==1)
+    {
+        prev=head;
+        while(temp->next!=head)
+        {
+            temp=temp->next;
+        }
+         temp->next=head->next;
+        head=head->next;
+        free(prev);
+    }
+    else if(pos==c+1)
+    {
+        while(temp->next != head)
+        {
+            prev=temp;
+            temp=temp->next;
+        }
+        prev->next=head;
+        free(temp);
+    }
+    else if(pos>1 && pos<c+1)
+    {
+        for (int i = 1; i < pos; i++) {
+            prev = temp;
+            temp = temp->next;
+        }
+        prev->next = temp->next;
+        free(temp);
+    }
+    else
+        printf("Invalid Position.");
+}
+int main()
+{
+    int choice, key, pos;
+    do{
+
+            printf("\nChoose!\n");
+            printf("\n1. Create.");
+            printf("\n2. Display.");
+            printf("\n3. Search by key.");
+            printf("\n4. Search by pos. ");
+            printf("\n5. Delete by key. ");
+            printf("\n6. Insert by order. ");
+            printf("\n7. Insert at beg. ");
+            printf("\n8. Insert at beg. ");
+            printf("\n9. Insert at pos. ");
+            printf("\n10. Delete at beg. ");
+            printf("\n11. Delete at rear. ");
+            printf("\n12. Delete at POS.");
+
+            scanf("%d", &choice);
+            switch(choice)
+            {
+                case 1:
+                create();
+                break;
+
+                case 2:
+                    display();
+                    break;
+                case 3:
+                    printf("\nEnter the key to search: ");
+                    scanf("%d", &key);
+                    searchByKey(key);
+                    break;
+                case 4:
+                    printf("\nEnter the position.");
+                    scanf("%d", &pos);
+                    searchbypos(pos);
+                    break;
+                case 5:
+                    printf("Enter the key to delete.");
+                    scanf("%d", &key);
+                    deletebykey(key);
+                    break;
+                case 6:
+                    printf("\nEnter the key: ");
+                    scanf("%d", &key);
+                    insertbyorder(key);
+                    break;
+                 case 7:
+                    printf("\nEnter the key: ");
+                    scanf("%d", &key);
+                    insertatbeg(key);
+                    break;
+                case 8:
+                    printf("\nEnter the key: ");
+                    scanf("%d", &key);
+                    insertatend(key);
+                    break;
+                case 9:
+                    printf("\nEnter the key and position: ");
+                    scanf("%d%d", &key, &pos);
+                    insertatpos(pos, key);
+                    break;
+
+                case 10:
+                    deletefront();
+                    break;
+
+                case 11:
+                    deleteRear();
+                    break;
+                case 12:
+                    printf("\nEnter the position.");
+                    scanf("%d", &pos);
+                    deletePos(pos);
+                    break;
+
+            }
+    }while(choice!=0);
+    getch();
+    return 0;
+
+}
