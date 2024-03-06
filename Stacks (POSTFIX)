@@ -1,0 +1,163 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define MAX 100
+struct stack
+{
+    int top;
+    char array[MAX];
+};
+
+void initialise(struct stack *s)
+{
+    s->top=-1;
+}
+
+void push(struct stack *s, char item)
+{
+    if(s->top==MAX-1)
+        printf("Overflow!");
+    s->array[++s->top]=item;
+}
+
+char pop(struct stack *s)
+{
+    if(s->top==-1)
+        printf("Underflow.");
+    else
+        return s->array[s->top--];
+}
+
+int prec(char c)
+{
+ if(c=='^')
+   return 3;
+ if(c=='/' || c=='*' || c=='%')
+   return 2;
+ if(c=='+' || c=='-')
+   return 1;
+ return -1;
+}
+
+char associativity(char c)
+{
+ if(c=='^')
+   return 'R';
+ return 'L';
+}
+
+void infixToPostfix(char s1[], char postfix[])
+{
+    int index=0, i;
+    int len=strlen(s1);
+    struct stack *s=(struct stack *)malloc(sizeof(struct stack));
+    s->top=-1;
+    for(i=0; i<len; i++)
+    {
+        char c=s1[i];
+          if((c>='a' && c<='z') || ( c>='A' && c<='Z') || (c>='0' && c<='9'))
+            postfix[index++]=c;
+          else if(c=='(')
+            push(s, c);
+          else if(c==')')
+          {
+              while(s->top>=0 && s->array[s->top]!='(')
+                        postfix[index++]=pop(s);
+              pop(s);
+          }
+          else
+          {
+              while(s->top>=0 && prec(c)<prec(s->array[s->top]) || prec(c)== prec(s->array[s->top] && associativity(c)=='L'))
+                    postfix[index++]=pop(s);
+              push(s, c);
+          }
+    }
+    while(s->top>=0)
+        postfix[index++]=pop(s);
+    postfix[index]='\0';
+    int len1=strlen(postfix);
+    for(int i=0; i<len1; i++)
+        printf("%c", postfix[i]);
+}
+
+
+float eval(char postfix[])
+{
+    int len=strlen(postfix);
+    float op1, op2, res;
+    int i;
+    struct stack *s=(struct stack *)malloc(sizeof(struct stack));
+    s->top=-1;
+    for(i=0; i<len; i++)
+    {
+        char c=postfix[i];
+        if(c>='0' && c<='9')
+            push(s, (float)(c-'0'));
+        else
+        {
+            op2=pop(s);
+            op1=pop(s);
+            switch(c)
+            {
+                case '+':
+                    res=op1+op2;
+                    break;
+                case '-':
+                    res=op1-op2;
+                    break;
+                case '*':
+                    res=op1*op2;
+                    break;
+                case '/':
+                    res=op1/op2;
+                    break;
+            }
+            push(s, res);
+        }
+    }
+    return pop(s);
+}
+
+int main()
+{
+    char infix[100], postfix[100];
+    int choice;
+
+    do
+    {
+        printf("\nMenu:\n");
+        printf("1. Enter infix expression\n");
+        printf("2. Evaluate expression\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            printf("Enter the infix expression: ");
+            scanf("%s", infix);
+            infixToPostfix(infix, postfix);
+            break;
+
+        case 2:
+            if (postfix[0] == '\0')
+            {
+                printf("Please enter an infix expression first.\n");
+                break;
+            }
+            float result = eval(postfix);
+            printf("The evaluated expression is %.2f\n", result);
+            break;
+
+        case 3:
+            printf("Exiting the program.\n");
+            break;
+
+        default:
+            printf("Invalid choice. Please enter a valid option.\n");
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
