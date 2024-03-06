@@ -1,0 +1,182 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define MAX 100
+struct stack
+{
+    int top;
+    char array[MAX];
+};
+
+void initialise(struct stack *s)
+{
+    s->top=-1;
+}
+
+void push(struct stack *s, char item)
+{
+    if(s->top==MAX-1)
+        printf("Overflow!");
+    s->array[++s->top]=item;
+}
+
+char pop(struct stack *s)
+{
+    if(s->top==-1)
+        printf("Underflow.");
+    else
+        return s->array[s->top--];
+}
+
+int prec(char c)
+{
+ if(c=='^')
+   return 3;
+ if(c=='/' || c=='*' || c=='%')
+   return 2;
+ if(c=='+' || c=='-')
+   return 1;
+ return -1;
+}
+
+char associativity(char c)
+{
+ if(c=='^')
+   return 'R';
+ return 'L';
+}
+
+void reverse(char infix[])
+{
+    char temp;
+    int start, end;
+    int len=strlen(infix);
+    for(start=0, end=len-1; start<end; start++, end--)
+    {
+        temp=infix[start];
+        infix[start]=infix[end];
+        infix[end]=temp;
+    }
+}
+
+void infixToPrefix(char s[], char prefix[])
+{
+    int index=0, i;
+    int len=strlen(s);
+    struct stack *s1=(struct stack *)malloc(sizeof(struct stack));
+    s1->top=-1;
+    reverse(s);
+    for(i=0; i<len; i++)
+    {
+        char ch=s[i];
+        if(ch>='a' && ch<='z' || ch>='A' && ch<='Z'|| ch>='0' && ch<='9')
+            prefix[index++]=ch;
+        else if(ch==')')
+            push(s1, ch);
+        else if(ch=='(')
+        {
+            while(s1->top>=0 && s1->array[s1->top]!=')')
+               prefix[index++]=pop(s1);
+            pop(s1);
+        }
+        else
+        {
+            while(s1->top>=0 && prec(ch)<prec(s1->array[s1->top]))
+            {
+                prefix[index++]=pop(s1);
+            }
+            push(s1,ch);
+        }
+    }
+    while(s1->top>=0)
+    {
+        prefix[index++]=pop(s1);
+    }
+
+    prefix[index]='\0';
+    reverse(prefix);
+    int l=strlen(prefix);
+    for(i=0; i<l; i++)
+        printf("%c", prefix[i]);
+}
+
+float eval(char prefix[])
+{
+    float op1, op2, res;
+    struct stack *s1=(struct stack *)malloc(sizeof(struct stack));
+    s1->top=-1;
+    int len=strlen(prefix);
+    int i;
+    for(i=len-1; i>=0; i--)
+    {
+        char c=prefix[i];
+        if(c>='0' && c<='9')
+            push(s1, (float)(c-'0'));
+        else
+        {
+            op1=pop(s1);
+            op2=pop(s1);
+            switch(c)
+            {
+                case '+':
+                    res=op1+op2;
+                    break;
+                case '-':
+                    res=op1-op2;
+                    break;
+                case '*':
+                    res=op1*op2;
+                    break;
+                case '/':
+                    res=op1/op2;
+                    break;
+            }
+            push(s1, res);
+        }
+    }
+
+    return pop(s1);
+}
+int main()
+{
+    char infix[100], prefix[100];
+    int choice;
+
+    do
+    {
+        printf("\nMenu:\n");
+        printf("1. Enter infix expression\n");
+        printf("2. Evaluate expression\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            printf("Enter the infix expression: ");
+            scanf("%s", infix);
+            infixToPrefix(infix, prefix);
+            break;
+
+        case 2:
+            if (prefix[0] == '\0')
+            {
+                printf("Please enter an infix expression first.\n");
+                break;
+            }
+            float result = eval(prefix);
+            printf("The evaluated expression is %.2f\n", result);
+            break;
+
+        case 3:
+            printf("Exiting the program.\n");
+            break;
+
+        default:
+            printf("Invalid choice. Please enter a valid option.\n");
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
