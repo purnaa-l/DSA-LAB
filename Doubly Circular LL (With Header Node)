@@ -1,0 +1,405 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node
+{
+    int data;
+    struct node *next;
+    struct node *prev;
+};
+
+struct dclist
+{
+    struct node *head;
+};
+
+struct node *createnode(int val)
+{
+    struct node *list=(struct node *)malloc(sizeof(struct node));
+    list->data=val;
+    list->next=NULL;
+    list->prev=NULL;
+    return list;
+}
+
+void insertAtbeg(struct dclist *list, int val)
+{
+    struct node *newnode=createnode(val);
+    if(list->head == NULL)
+    {
+        list->head=newnode;
+        newnode->next=newnode;
+        newnode->prev=newnode;
+        return;
+    }
+    newnode->next=list->head;
+    newnode->prev=list->head->prev;
+    list->head->prev->next=newnode;
+    list->head->prev=newnode;
+    list->head=newnode;
+}
+
+void display (struct dclist *List)
+{
+    if (List->head == NULL)
+    {
+        printf("list is empty\n");
+        return;
+    }
+    struct node *current = List->head;
+    do
+    {
+        printf("%d ", current->data);
+        current=current->next;
+    } while (current != List->head);
+    printf("\n");
+}
+
+void insertByOrder(struct dclist *list, int val)
+{
+    struct node *newnode = createnode(val);
+    if (list->head == NULL)
+    {
+        // If the list is empty, insert at the beginning
+        list->head = newnode;
+        newnode->next = newnode;
+        newnode->prev = newnode;
+        return;
+    }
+    struct node *current = list->head;
+    // Find the position to insert the new node
+    while (current->next != list->head && current->next->data < val)
+    {
+        current = current->next;
+    }
+    // If the new node should be inserted at the beginning
+    if (current->data >= val)
+    {
+        newnode->next = current;
+        newnode->prev = current->prev;
+        current->prev->next = newnode;
+        current->prev = newnode;
+        list->head = newnode;
+    }
+    else
+    {
+        newnode->next = current->next;
+        newnode->prev = current;
+        current->next->prev = newnode;
+        current->next = newnode;
+    }
+}
+
+void deleteByPosition(struct dclist *list, int pos)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return;
+    }
+    struct node *current = list->head;
+    int count = 1;
+    while (count != pos && current->next != list->head)
+    {
+        current = current->next;
+        count++;
+    }
+    if (count == pos)
+    {
+        if (current->next == list->head && current->prev == list->head) // Only one node in the list
+        {
+            free(current);
+            list->head = NULL;
+        }
+        else
+        {
+            current->prev->next = current->next;
+            current->next->prev = current->prev;
+            if (current == list->head)
+                list->head = current->next;
+            free(current);
+        }
+        printf("Node at position %d deleted successfully\n", pos);
+    }
+    else
+    {
+        printf("Invalid position\n");
+    }
+}
+
+int searchByKey(struct dclist *list, int key)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return 0;
+    }
+    struct node *current = list->head;
+    int t=-1;
+    int pos = 1;
+    do
+    {
+        if (current->data == key)
+        {
+             t=100;
+             return pos;
+        }
+        current = current->next;
+        pos++;
+    } while (current != list->head);
+
+    if(t<0)
+        printf("Key Not Found.");
+    return -1;
+}
+
+void deleteByKey(struct dclist *list, int key)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return;
+    }
+    struct node *current = list->head;
+    while (current->data != key && current->next != list->head)
+    {
+        current = current->next;
+    }
+    if (current->data == key)
+    {
+        if (current->next == list->head && current->prev == list->head) // Only one node in the list
+        {
+            free(current);
+            list->head = NULL;
+        }
+        else
+        {
+            current->prev->next = current->next;
+            current->next->prev = current->prev;
+            if (current == list->head)
+                list->head = current->next;
+            free(current);
+        }
+        printf("Node with key %d deleted successfully\n", key);
+    }
+    else
+    {
+        printf("Key not found\n");
+    }
+}
+
+void insertRear(struct dclist *list, int val)
+{
+    struct node *newnode=createnode(val);
+    if(list->head == NULL)
+    {
+        list->head=newnode;
+        newnode->next=newnode;
+        newnode->prev=newnode;
+    }
+    else
+    {
+        newnode->next = list->head;
+        newnode->prev = list->head->prev;
+        list->head->prev->next = newnode;
+        list->head->prev = newnode;
+    }
+}
+
+int searchByPosition(struct dclist *list, int pos)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return 0;
+    }
+    struct node *current = list->head;
+    int count = 1;
+    do
+    {
+        if (count == pos)
+            return current->data;
+        current = current->next;
+        count++;
+    } while (current != list->head);
+    printf("Invalid position\n");
+    return 0;
+}
+
+void insertByPosition(struct dclist *list, int val, int pos)
+{
+    struct node *newnode=createnode(val);
+    if (pos == 1) // Insert at the front
+    {
+        if(list->head == NULL)
+        {
+            list->head=newnode;
+            newnode->next=newnode;
+            newnode->prev=newnode;
+        }
+        else
+        {
+            newnode->next=list->head;
+            newnode->prev=list->head->prev;
+            list->head->prev->next=newnode;
+            list->head->prev=newnode;
+            list->head=newnode;
+        }
+    }
+    else
+    {
+        struct node *current = list->head;
+        int count = 1;
+        while (count != pos && current->next != list->head)
+        {
+            current = current->next;
+            count++;
+        }
+        if (count == pos)
+        {
+            newnode->next = current;
+            newnode->prev = current->prev;
+            current->prev->next = newnode;
+            current->prev = newnode;
+        }
+        else
+        {
+            printf("Invalid position\n");
+            free(newnode);
+        }
+    }
+}
+
+void deleteRear(struct dclist *list)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return;
+    }
+    struct node *current = list->head->prev;
+    if (current->next == current) // Only one node in the list
+    {
+        free(current);
+        list->head = NULL;
+    }
+    else
+    {
+        current->prev->next = list->head;
+        list->head->prev = current->prev;
+        free(current);
+    }
+}
+
+void deleteFront(struct dclist *list)
+{
+    if (list->head == NULL)
+    {
+        printf("List is empty\n");
+        return;
+    }
+    struct node *current = list->head;
+    if (current->next == current) // Only one node in the list
+    {
+        free(current);
+        list->head = NULL;
+    }
+    else
+    {
+        current->prev->next = current->next;
+        current->next->prev = current->prev;
+        list->head = current->next;
+        free(current);
+    }
+}
+
+int main()
+{
+    struct dclist *mylist;
+    mylist=(struct dclist *)malloc(sizeof(struct dclist));
+    mylist->head = NULL;
+
+    int choice, val, pos, key;
+
+    do
+    {
+        printf("\nCircular Doubly Linked List Operations:\n");
+        printf("1. Insert at beginning\n");
+        printf("2. Insert by order\n");
+        printf("3. Insert at rear\n");
+        printf("4. Insert by position\n");
+        printf("5. Delete by position\n");
+        printf("6. Delete from rear\n");
+        printf("7. Delete from front\n");
+        printf("8. Search for item by key\n");
+        printf("9. Search for item by position\n");
+        printf("10. Delete by key\n");
+        printf("11. Display list\n");
+        printf("12. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice)
+        {
+        case 1:
+            printf("Enter value to insert at beginning: ");
+            scanf("%d", &val);
+            insertAtbeg(mylist, val);
+            break;
+        case 2:
+            printf("Enter value to insert by order: ");
+            scanf("%d", &val);
+            insertByOrder(mylist, val);
+            break;
+        case 3:
+            printf("Enter value to insert at rear: ");
+            scanf("%d", &val);
+            insertRear(mylist, val);
+            break;
+        case 4:
+            printf("Enter value to insert: ");
+            scanf("%d", &val);
+            printf("Enter position to insert: ");
+            scanf("%d", &pos);
+            insertByPosition(mylist, val, pos);
+            break;
+        case 5:
+            printf("Enter position to delete: ");
+            scanf("%d", &pos);
+            deleteByPosition(mylist, pos);
+            break;
+        case 6:
+            deleteRear(mylist);
+            break;
+        case 7:
+            deleteFront(mylist);
+            break;
+        case 8:
+            printf("Enter key to search: ");
+            scanf("%d", &key);
+            printf("Position of key %d: %d\n", key, searchByKey(mylist, key));
+            break;
+        case 9:
+            printf("Enter position to search: ");
+            scanf("%d", &pos);
+            printf("Data at position %d: %d\n", pos, searchByPosition(mylist, pos));
+            break;
+        case 10:
+            printf("Enter key to delete: ");
+            scanf("%d", &key);
+            deleteByKey(mylist, key);
+            break;
+        case 11:
+            printf("Circular Doubly Linked List: ");
+            display(mylist);
+            break;
+        case 12:
+            printf("Exiting...\n");
+            break;
+        default:
+            printf("Invalid choice! Please enter a valid option.\n");
+        }
+    } while (choice != 12);
+
+    return 0;
+}
